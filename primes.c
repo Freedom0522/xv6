@@ -67,63 +67,48 @@
 #include"kernel/types.h"
 #include"user/user.h"
 
-int is_Prime(int n){
-  //  int tag = 1;
-
-        for(int k = 2;k*k <= n;k++){
-          if(n%k==0){
-            return 0;
-          }
-        }
-        return 1;
-}
-
-int main(){
-    int fd[2],f[2];
-    if(pipe(fd) == -1){
-        printf("First prime error");
-        exit(1); // creat first prime 
-    }
-    if(pipe(f) == -1){
-        printf("First prime error");
-        exit(1); // creat first prime 
-    }
-    //int id = fork();//child1
-    if(fork() == 0){
-      close(fd[1]);
-      close(f[0]);
-      int n;
-      while(read(fd[0],&n,sizeof(int))>0){
-      if(is_Prime(n)){
-         write(f[1],&n,sizeof(int));
+int f[2];
+void write_p(int n){
+  //int f[2];
+  close(f[0]);
+  if(fork() == 0){
+    for(int i = n;i <= 35;++i){
+      if(i%n != 0){
+        write(f[1],&i,sizeof(int));
       }
     }
-    close(fd[0]);
-    close(f[1]);
-    exit(0);
   }
-
-
+  close(f[1]);
+  //exit(0);
+  // if(n == 35)return;
+  // sieve(n+1,f[1]);
+}
+int main(){
+  int fd[2];
+  pipe(fd);
+  pipe(f);
   if(fork() == 0){
-    close(fd[0]);
-    close(fd[1]);
+    // int f[2];
+    // pipe(f);
+    int n;
+    while(read(fd[0],&n,sizeof(int))>0){
+         write_p(n);
+    };
+  }
+  
+  if(fork() == 0){
+    int num;
     close(f[1]);
-    int nums;
-    while(read(f[0],&nums,sizeof(int))){
-      printf("prime:%d\n",nums);
+    while(read(f[0],&num,sizeof(int))>0){
+      printf("prime:%d\n",num);
     }
     close(f[0]);
-    exit(0);
   }
-   close(fd[0]);
-   close(f[0]);
-   close(f[1]);
-    for(int i = 2;i <= 35;++i ){
-      write(fd[1],&i,sizeof(int));
-    }
-      close(fd[1]);
-      wait(0);
-      wait(0);
-      exit(0);
+  for(int i = 2;i <= 35;++i){
+    write(fd[1],&i,sizeof(int));
   }
-    
+  close(fd[1]);
+  wait(0);
+  wait(0);
+  exit(0);
+}
