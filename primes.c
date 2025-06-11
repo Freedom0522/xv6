@@ -69,7 +69,8 @@
 
 int is_Prime(int n){
   //  int tag = 1;
-        for(int k = 2;k < n;k++){
+
+        for(int k = 2;k*k <= n;k++){
           if(n%k==0){
             return 0;
           }
@@ -92,7 +93,7 @@ int main(){
       close(fd[1]);
       close(f[0]);
       int n;
-      while(read(fd[0],&n,sizeof(int))){
+      while(read(fd[0],&n,sizeof(int))>0){
       if(is_Prime(n)){
          write(f[1],&n,sizeof(int));
       }
@@ -102,25 +103,27 @@ int main(){
     exit(0);
   }
 
+
   if(fork() == 0){
     close(fd[0]);
     close(fd[1]);
     close(f[1]);
     int nums;
     while(read(f[0],&nums,sizeof(int))){
-      printf("primes:%d",nums);
+      printf("prime:%d\n",nums);
     }
     close(f[0]);
     exit(0);
   }
-
+   close(fd[0]);
+   close(f[0]);
+   close(f[1]);
     for(int i = 2;i <= 35;++i ){
       write(fd[1],&i,sizeof(int));
+    }
       close(fd[1]);
       wait(0);
       wait(0);
       exit(0);
-
-    }
   }
     
