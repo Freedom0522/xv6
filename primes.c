@@ -67,49 +67,60 @@
 #include"kernel/types.h"
 #include"user/user.h"
 
+int is_Prime(int n){
+  //  int tag = 1;
+        for(int k = 2;k < n;k++){
+          if(n%k==0){
+            return 0;
+          }
+        }
+        return 1;
+}
+
 int main(){
-    int fd[2];
+    int fd[2],f[2];
     if(pipe(fd) == -1){
         printf("First prime error");
         exit(1); // creat first prime 
     }
-    int id = fork();//child1
+    if(pipe(f) == -1){
+        printf("First prime error");
+        exit(1); // creat first prime 
+    }
+    //int id = fork();//child1
+    if(fork() == 0){
+      close(fd[1]);
+      close(f[0]);
+      int n;
+      while(read(fd[0],&n,sizeof(int))){
+      if(is_Prime(n)){
+         write(f[1],&n,sizeof(int));
+      }
+    }
+    close(fd[0]);
+    close(f[1]);
+    exit(0);
+  }
+
+  if(fork() == 0){
+    close(fd[0]);
+    close(fd[1]);
+    close(f[1]);
+    int nums;
+    while(read(f[0],&nums,sizeof(int))){
+      printf("primes:%d",nums);
+    }
+    close(f[0]);
+    exit(0);
+  }
+
     for(int i = 2;i <= 35;++i ){
-        if(id == 0){
-        c_id = fork(); //create child2
-        if(c_id == 0){
-            int tmp;
-            read(fd[0],&tmp,sizeof(int));
-            //close(fd[0]);
-            int f[2];
-            if(pipe(f) == -1){
-                printf("Second pipe error");
-            }
-            int is_Prime = 1;
-            for(int j = 0; j< tmp;++j){
-                if(tmp % j == 0){
-                    is_Prime = 0;
-                    break;
-                }
-            }
-            if(is_Prime){
-                write(f[1],&tmp,sizeof(int));
-            }
+      write(fd[1],&i,sizeof(int));
+      close(fd[1]);
+      wait(0);
+      wait(0);
+      exit(0);
 
-        }
-        else{
-            int c_tmp;
-            close(f[1]);
-            read(f[0],&c_tmp;sizeof(int));
-            printf("primes:%d",&c_tmp);
-
-        }
     }
-        else{
-            if((write(fd[1],&i,sizoef(int)))== -1){
-                printf("Wrinting error");
-            }
-        }
-       }    
-    }
+  }
     
